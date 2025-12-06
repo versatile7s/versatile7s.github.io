@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>VIBE Entertainment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 구글 폰트 -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ====== 공통 리셋 & 배경 설정 ====== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #ffffff;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    /* ====== 전체 레이아웃 ====== */
+    .page-wrap {
+      position: relative;
+      min-height: 100vh;
+      z-index: 1; /* 캔버스 위로 */
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    section {
+      padding: 80px 0;
+    }
+
+    /* ====== 고정 캔버스 배경 ====== */
+    #fixed-bg {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none; /* 클릭/스크롤 방해 안하게 */
+    }
+
+    canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      aspect-ratio: 1;
+    }
+
+    #c {
+      width: auto;
+      height: 100%;
+    }
+
+    #c2 {
+      width: 100%;
+      height: auto;
+    }
+
+    @media (max-aspect-ratio: 1) {
+      #c {
+        width: 100%;
+        height: auto;
+      }
+
+      #c2 {
+        width: auto;
+        height: 100%;
+      }
+    }
+
+    /* ====== 상단 네비게이션 ====== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+      width: 90%;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
+
+    .logo span {
+      color: #ff27f2;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a {
+      opacity: 0.85;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    /* ====== 히어로 섹션 ====== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-top: 64px;
+    }
+
+    .hero-overlay {
+      /* 배경은 캔버스로, 여기선 살짝 그라디언트 + 블러 */
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(38, 16, 51, 0.6), rgba(0, 0, 0, 0.9));
+      backdrop-filter: blur(0px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 48px;
+      align-items: center;
+    }
+
+    /* 글리치 타이틀 */
+    .glitch {
+      position: relative;
+      font-size: clamp(2.4rem, 4vw, 3.4rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+    }
+
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      clip-path: inset(0 0 0 0);
+    }
+
+    .glitch::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff27f2;
+      animation: glitch-1 2.1s infinite linear alternate-reverse;
+    }
+
+    .glitch::after {
+      left: -2px;
+      text-shadow: 2px 0 #4d7cff;
+      animation: glitch-2 1.8s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-1 {
+      0% {
+        clip-path: inset(10% 0 85% 0);
+        transform: translate(-1px, -1px);
+      }
+      25% {
+        clip-path: inset(40% 0 40% 0);
+        transform: translate(-2px, 1px);
+      }
+      50% {
+        clip-path: inset(80% 0 5% 0);
+        transform: translate(1px, -1px);
+      }
+      75% {
+        clip-path: inset(5% 0 80% 0);
+        transform: translate(1px, 1px);
+      }
+      100% {
+        clip-path: inset(50% 0 20% 0);
+        transform: translate(-1px, 0);
+      }
+    }
+
+    @keyframes glitch-2 {
+      0% {
+        clip-path: inset(80% 0 5% 0);
+        transform: translate(1px, 0);
+      }
+      25% {
+        clip-path: inset(5% 0 80% 0);
+        transform: translate(-1px, -1px);
+      }
+      50% {
+        clip-path: inset(35% 0 40% 0);
+        transform: translate(-2px, 1px);
+      }
+      75% {
+        clip-path: inset(10% 0 85% 0);
+        transform: translate(1px, 1px);
+      }
+      100% {
+        clip-path: inset(40% 0 40% 0);
+        transform: translate(0, -1px);
+      }
+    }
+
+    .hero-kicker {
+      font-size: 0.85rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 10px;
+    }
+
+    .hero-sub {
+      max-width: 420px;
+      font-size: 0.95rem;
+      color: #d2d2d2;
+      margin-bottom: 32px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .badge.pink {
+      border-color: rgba(255, 39, 242, 0.8);
+      color: #ffb8fa;
+    }
+
+    /* 버튼 */
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .btn {
+      position: relative;
+      padding: 12px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      background: transparent;
+      color: #ffffff;
+      overflow: hidden;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at 10% 0, #ff27f2 0, #4d7cff 45%, #000000 100%);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 24px rgba(255, 39, 242, 0.45);
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transform: translateX(-120%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(255, 39, 242, 0.6);
+      border-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .btn:hover::after {
+      animation: shine 0.7s ease;
+      opacity: 1;
+    }
+
+    @keyframes shine {
+      0% {
+        transform: translateX(-120%);
+      }
+      100% {
+        transform: translateX(140%);
+      }
+    }
+
+    /* 히어로 오른쪽 카드 */
+    .hero-card {
+      border-radius: 24px;
+      padding: 20px;
+      background: radial-gradient(circle at top, rgba(255, 39, 242, 0.24), rgba(0, 0, 0, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow:
+        0 0 40px rgba(255, 39, 242, 0.22),
+        0 0 80px rgba(77, 124, 255, 0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.7;
+      margin-bottom: 12px;
+    }
+
+    .hero-card-main {
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 18px;
+      background: radial-gradient(circle at 0 0, rgba(255, 39, 242, 0.25), rgba(0, 0, 0, 0.95));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card-main::before {
+      content: "";
+      position: absolute;
+      inset: -80px;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.06),
+        rgba(255, 255, 255, 0.06) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      mix-blend-mode: soft-light;
+      opacity: 0.4;
+      animation: scan 6s linear infinite;
+    }
+
+    @keyframes scan {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(-40px);
+      }
+    }
+
+    .hero-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .hero-card-sub {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      margin-bottom: 16px;
+    }
+
+    .hero-stat-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .hero-stat {
+      flex: 1;
+      min-width: 90px;
+      font-size: 0.78rem;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .hero-stat-label {
+      opacity: 0.6;
+      margin-bottom: 4px;
+    }
+
+    .hero-stat-value {
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+
+    .hero-card-footer {
+      margin-top: 12px;
+      font-size: 0.75rem;
+      opacity: 0.75;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .hero-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #4dff88;
+      box-shadow: 0 0 10px #4dff88;
+      animation: pulse 1.7s infinite ease-out;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.9);
+        opacity: 0;
+      }
+    }
+
+    /* ====== 공통 섹션 헤더 ====== */
+    .section-header {
+      margin-bottom: 36px;
+    }
+
+    .section-kicker {
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+
+    .section-sub {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      max-width: 420px;
+      margin-top: 8px;
+    }
+
+    /* ====== 아티스트 섹션 ====== */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .artist-card {
+      position: relative;
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(7, 7, 10, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .artist-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(from 180deg, #ff27f2, #4d7cff, #9b52ff, #ff27f2);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      animation: spin 12s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .artist-inner {
+      position: relative;
+      border-radius: 14px;
+      padding: 14px;
+      background: radial-gradient(circle at 0 0, rgba(255, 39, 242, 0.22), rgba(0, 0, 0, 0.98));
+    }
+
+    .artist-tag {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+
+    .artist-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .artist-genre {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
+    .artist-meta {
+      font-size: 0.75rem;
+      opacity: 0.85;
+    }
+
+    .artist-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 0 28px rgba(255, 39, 242, 0.35),
+        0 0 50px rgba(77, 124, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .artist-card:hover::before {
+      opacity: 0.7;
+    }
+
+    /* ====== 프로젝트 섹션 ====== */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .project-card {
+      border-radius: 18px;
+      padding: 18px;
+      background: rgba(6, 6, 10, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+
+    .project-title {
+      font-size: 1.02rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .project-desc {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-bottom: 12px;
+    }
+
+    .project-meta {
+      font-size: 0.78rem;
+      opacity: 0.75;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ====== About 섹션 ====== */
+    .about-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 38px;
+      align-items: center;
+    }
+
+    .about-text {
+      font-size: 0.9rem;
+      opacity: 0.86;
+    }
+
+    .about-highlight {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .about-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .about-pill {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* ====== Contact 섹션 ====== */
+    .contact-box {
+      border-radius: 22px;
+      padding: 24px;
+      background: radial-gradient(circle at top, rgba(77, 124, 255, 0.22), rgba(0, 0, 0, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .contact-main {
+      font-size: 0.95rem;
+      max-width: 420px;
+    }
+
+    .contact-sub {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* ====== 푸터 ====== */
+    footer {
+      padding: 28px 0 40px;
+      font-size: 0.78rem;
+      opacity: 0.7;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 40px;
+    }
+
+    footer .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ====== 반응형 ====== */
+    @media (max-width: 880px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .hero {
+        padding-top: 72px;
+      }
+
+      .hero-sub {
+        max-width: none;
+      }
+
+      .hero-card {
+        margin-top: 6px;
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-2,
+      .about-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      section {
+        padding: 64px 0;
+      }
+
+      .grid-3 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .section-title {
+        font-size: 1.35rem;
+      }
+
+      .glitch {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 고정 애니메이션 배경 -->
+  <div id="fixed-bg">
+    <canvas id="c2"></canvas>
+    <canvas id="c"></canvas>
+  </div>
+
+  <!-- 실제 페이지 내용 -->
+  <div class="page-wrap">
+    <!-- 네비게이션 -->
+    <header class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          VIBE<span>LAB</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#artists">ARTISTS</a>
+          <a href="#projects">PROJECTS</a>
+          <a href="#about">ABOUT</a>
+          <a href="#contact">CONTACT</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- 히어로 섹션 -->
+    <section class="hero">
+      <div class="hero-overlay"></div>
+      <div class="container hero-grid">
+        <!-- 왼쪽 텍스트 -->
+        <div>
+          <div class="hero-kicker">ENTERTAINMENT COLLECTIVE</div>
+          <h1 class="glitch" data-text="VIBE IN NEON">
+            VIBE IN NEON
+          </h1>
+          <p class="hero-sub">
+            우리는 힙합, 스트릿 컬처, 비주얼 아트를 결합해
+            새로운 엔터테인먼트 씬의 무드를 디자인합니다.
+            음악, 무대, 영상이 한 번에 터지는 그 순간을 만들어요.
+          </p>
+
+          <div class="badge-row">
+            <div class="badge pink">HIPHOP · RNB · POP</div>
+            <div class="badge">ARTIST MANAGEMENT</div>
+            <div class="badge">LIVE SHOW PRODUCTION</div>
+          </div>
+
+          <div class="button-row">
+            <a href="#artists" class="btn btn-primary">Meet Our Artists</a>
+            <a href="#projects" class="btn">Recent Projects</a>
+          </div>
+        </div>
+
+        <!-- 오른쪽 네온 카드 -->
+        <div class="hero-card">
+          <div class="hero-card-tag">LIVE SESSION SNAPSHOT</div>
+          <div class="hero-card-main">
+            <div class="hero-card-title">Night Drive Showcase</div>
+            <div class="hero-card-sub">
+              도심 네온 불빛 아래, 로컬 아티스트들과 함께 만든
+              비공개 쇼케이스. 모든 순간을 한 편의 영상처럼 설계합니다.
+            </div>
+
+            <div class="hero-stat-row">
+              <div class="hero-stat">
+                <div class="hero-stat-label">ARTISTS</div>
+                <div class="hero-stat-value">12 CREW</div>
+              </div>
+              <div class="hero-stat">
+                <div class="hero-stat-label">CITY</div>
+                <div class="hero-stat-value">Seoul · Busan</div>
+              </div>
+              <div class="hero-stat">
+                <div class="hero-stat-label">VIEW COUNT</div>
+                <div class="hero-stat-value">1.2M+</div>
+              </div>
+            </div>
+
+            <div class="hero-card-footer">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="hero-pulse-dot"></div>
+                <span>Real-time collab with dancers, DJs, visual artists.</span>
+              </div>
+              <span>2025 · LIVE TAPE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 아티스트 섹션 -->
+    <section id="artists">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">ARTIST ROSTER</div>
+          <div class="section-title">우리와 함께하는 크루</div>
+          <p class="section-sub">
+            장르보다는 무드를 먼저 보는 팀입니다. 힙합, R&amp;B, 인디팝까지
+            밤 감성, 네온, 스트릿 무드를 가진 아티스트들을 큐레이션합니다.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <!-- 아티스트 카드 1 -->
+          <article class="artist-card">
+            <div class="artist-inner">
+              <div class="artist-tag">RAPPER · PRODUCER</div>
+              <div class="artist-name">NEON KID</div>
+              <div class="artist-genre">Trap / Alt R&amp;B / Night Vibes</div>
+              <div class="artist-meta">
+                도시의 밤과 타는 감정을 네온 사운드로 만드는 프로듀서이자 래퍼.
+              </div>
+            </div>
+          </article>
+
+          <!-- 아티스트 카드 2 -->
+          <article class="artist-card">
+            <div class="artist-inner">
+              <div class="artist-tag">VOCALIST</div>
+              <div class="artist-name">LUNA SEO</div>
+              <div class="artist-genre">Soul / Pop / Chill</div>
+              <div class="artist-meta">
+                몽환적인 톤으로 드라이브 플레이리스트를 책임지는 싱어송라이터.
+              </div>
+            </div>
+          </article>
+
+          <!-- 아티스트 카드 3 -->
+          <article class="artist-card">
+            <div class="artist-inner">
+              <div class="artist-tag">DJ · VISUAL</div>
+              <div class="artist-name">VX TAPE</div>
+              <div class="artist-genre">House / Visual Set</div>
+              <div class="artist-meta">
+                세트 전체를 하나의 아트워크로 연출하는 DJ &amp; VJ 유닛.
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 프로젝트 섹션 -->
+    <section id="projects">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">PROJECTS</div>
+          <div class="section-title">최근 작업과 쇼케이스</div>
+          <p class="section-sub">
+            단순 공연이 아니라, 브랜드와 아티스트가 같이 올라가는
+            “장면”을 설계합니다. 아래는 최근 진행한 프로젝트들입니다.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <!-- 프로젝트 카드 1 -->
+          <article class="project-card">
+            <div class="project-label">BRAND COLLAB</div>
+            <div class="project-title">“Midnight Alley” Pop-up Show</div>
+            <p class="project-desc">
+              스트릿 패션 브랜드와 함께한 미드나잇 팝업 쇼.
+              라이브 세트, 인터뷰, 즉석 무브를 한 번에 담아낸 네온 쇼케이스.
+            </p>
+            <div class="project-meta">
+              <span>Audience · 300+</span>
+              <span>Clips · 60s Vertical Series</span>
+            </div>
+          </article>
+
+          <!-- 프로젝트 카드 2 -->
+          <article class="project-card">
+            <div class="project-label">LIVE SESSION</div>
+            <div class="project-title">Studio Neon: Live Tape Vol.01</div>
+            <p class="project-desc">
+              아티스트 4팀이 밤새도록 돌아가며 녹음한 라이브 테이프.
+              한 공간, 한 무드, 여러 장르가 섞이는 실험적인 세션.
+            </p>
+            <div class="project-meta">
+              <span>Streaming · 500k+</span>
+              <span>City · Seoul</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- About 섹션 -->
+    <section id="about">
+      <div class="container">
+        <div class="about-layout">
+          <div>
+            <div class="section-kicker">ABOUT</div>
+            <div class="section-title">우리는 “무드”부터 디자인합니다</div>
+            <p class="about-text" style="margin-top:12px;">
+              VIBE LAB은 단순 기획사가 아니라,
+              아티스트와 브랜드가 함께 쌓아가는 세계관을 설계하는
+              엔터테인먼트 스튜디오입니다.
+              <br /><br />
+              음악, 공간, 조명, 영상까지 하나의 무드로 연결해서
+              “한 번 보면 잊히지 않는 장면”을 만드는 것이 우리의 역할입니다.
+            </p>
+
+            <div class="about-pill-row">
+              <div class="about-pill">Artist Development</div>
+              <div class="about-pill">Showcase &amp; Event Design</div>
+              <div class="about-pill">Brand Collaboration</div>
+              <div class="about-pill">Content Production</div>
+            </div>
+          </div>
+
+          <div>
+            <p class="about-highlight">
+              우리는 “팔리는 공연”보다<br />
+              “다시 보고 싶은 장면”을 남기는 것을 목표로 합니다.
+            </p>
+            <p class="about-text">
+              그래서 우리와 함께하는 아티스트는
+              단순 섭외 대상이 아니라, 함께 세계를 쌓아가는 파트너입니다.
+              장기적인 브랜딩과 팬덤 구축을 위해
+              기획 단계부터 끝까지 같이 고민합니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact 섹션 -->
+    <section id="contact">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-kicker">CONTACT</div>
+          <div class="section-title">함께 무드를 만들 준비가 되었다면</div>
+        </div>
+
+        <div class="contact-box">
+          <div class="contact-main">
+            <p>
+              아티스트 합류, 브랜드 컬래버, 쇼케이스 제안 등
+              어떤 형태의 협업이든 편하게 먼저 던져주세요.
+            </p>
+            <p class="contact-sub" style="margin-top:8px;">
+              데모 링크나 포트폴리오가 있다면 함께 보내주시면
+              더 빠르게 확인할 수 있습니다.
+            </p>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;min-width:210px;">
+            <!-- 여기에 실제 이메일, 인스타, 링크트리 등 넣으면 됨 -->
+            <a href="mailto:hello@vibelab.com" class="btn btn-primary">Send E-mail</a>
+            <a href="https://instagram.com" target="_blank" class="btn">Instagram</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer>
+      <div class="container footer-row">
+        <span>© 2025 VIBE LAB ENTERTAINMENT. All rights reserved.</span>
+        <span>Seoul · Street · Neon Culture</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- 배경 캔버스 애니메이션 스크립트 -->
+  <script>
+    const arr = []; // tree particles
+    const c = document.querySelector("#c");
+    const ctx = c.getContext("2d");
+    const cw = (c.width = 4000);
+    const ch = (c.height = 4000);
+    const T = Math.PI * 2;
+    const m = { x: cw / 2, y: 0 };
+    const xTo = gsap.quickTo(m, "x", { duration: 1.5, ease: "expo" });
+    const yTo = gsap.quickTo(m, "y", { duration: 1.5, ease: "expo" });
+
+    const arr2 = []; // snow particles
+    const c2 = document.querySelector("#c2");
+    const ctx2 = c2.getContext("2d");
+    c2.width = c2.height = 4000;
+
+    // 마우스 이동은 window 기준으로 받아서, 캔버스 비율에 맞게 보정
+    window.addEventListener("pointermove", (e) => {
+      const rect = c.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const scaleX = c.width / rect.width;
+      const scaleY = c.height / rect.height;
+      const scaledMouseX = mouseX * scaleX;
+      const scaledMouseY = mouseY * scaleY;
+      xTo(scaledMouseX);
+      yTo(scaledMouseY);
+    });
+
+    for (let i = 0; i < 999; i++) {
+      arr.push({
+        i: i,
+        cx: cw / 2,
+        cy: gsap.utils.mapRange(0, 999, 600, 3700, i),
+        r: i < 900 ? gsap.utils.mapRange(0, 999, 3, 770, i) : 50, // path radius
+        dot: 9, // dot radius
+        prog: 0.25,
+        s: 1,
+      });
+
+      const d = 99; // tree spin duration
+      arr[i].t = gsap
+        .timeline({ repeat: -1 })
+        .to(arr[i], { duration: d, prog: "+=1", ease: "slow(0.3, 0.4)" })
+        .to(
+          arr[i],
+          { duration: d / 2, s: 0.15, repeat: 1, yoyo: true, ease: "power3.inOut" },
+          0
+        )
+        .seek(Math.random() * d);
+
+      arr2.push({
+        x: cw * Math.random(),
+        y: -9,
+        i: i,
+        s: 3 + 5 * Math.random(),
+        a: 0.1 + 0.5 * Math.random(),
+      });
+
+      arr2[i].t = gsap
+        .to(arr2[i], { ease: "none", y: ch, repeat: -1 })
+        .seek(Math.random() * 99)
+        .timeScale(arr2[i].s / 700);
+    }
+
+    gsap.ticker.add(render);
+
+    ctx.fillStyle = ctx2.fillStyle = "#fff";
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.globalCompositeOperation = "lighter";
+
+    function render() {
+      ctx.clearRect(0, 0, cw, ch);
+      ctx2.clearRect(0, 0, cw, ch);
+      arr.forEach((c) => drawDot(c));
+      arr2.forEach((c) => drawSnow(c));
+    }
+
+    function drawDot(cPart) {
+      const angle = cPart.prog * T;
+      const vs = 0.2; // vertical scale of path
+      const x = Math.cos(angle) * cPart.r + cPart.cx;
+      const y = Math.sin(angle) * cPart.r * vs + cPart.cy;
+      const d = Math.sqrt((x - m.x) ** 2 + (y - m.y) ** 2);
+      const ms = gsap.utils.clamp(0.07, 1, d / cw);
+      ctx.beginPath();
+      ctx.arc(x, y, (cPart.dot * cPart.s) / 2 / ms, 0, T);
+      ctx.fill();
+      ctx.lineWidth = cPart.dot * cPart.s * 2 / ms;
+      ctx.stroke();
+    }
+
+    function drawSnow(cPart) {
+      const ys = gsap.utils.interpolate(1.3, 0.1, cPart.y / ch);
+      ctx2.save();
+
+      ctx2.beginPath();
+      ctx2.translate(cPart.x, cPart.y);
+      ctx2.rotate(50 * cPart.t.progress());
+      ctx2.arc(
+        gsap.utils.interpolate(-55, 55, cPart.i / 999),
+        gsap.utils.interpolate(-25, 25, cPart.i / 999),
+        cPart.s * ys,
+        0,
+        T
+      );
+      ctx2.globalAlpha = cPart.a * ys;
+      ctx2.fill();
+      ctx2.restore();
+    }
+
+    // intro
+    gsap.from(arr, { duration: 1, dot: 0, ease: "back.out(9)", stagger: -0.0009 });
+    gsap.from(m, { duration: 1.5, y: ch * 1.2, ease: "power2.inOut" });
+  </script>
+</body>
+</html>
