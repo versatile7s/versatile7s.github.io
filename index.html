@@ -155,7 +155,7 @@
     }
 
     .hero-overlay {
-      /* 배경은 캔버스로, 여기선 살짝 그라디언트 + 블러 */
+      /* 배경은 캔버스로, 여기선 살짝 그라디언트 */
       position: absolute;
       inset: 0;
       background: radial-gradient(circle at top, rgba(38, 16, 51, 0.6), rgba(0, 0, 0, 0.9));
@@ -375,6 +375,17 @@
       overflow: hidden;
     }
 
+    /* 여기: 히어로 카드 이미지 스타일 */
+    .hero-card-img {
+      border-radius: 14px;
+      margin-bottom: 14px;
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      mix-blend-mode: screen;
+      opacity: 0.95;
+    }
+
     .hero-card-main::before {
       content: "";
       position: absolute;
@@ -389,6 +400,7 @@
       mix-blend-mode: soft-light;
       opacity: 0.4;
       animation: scan 6s linear infinite;
+      pointer-events: none;
     }
 
     @keyframes scan {
@@ -802,6 +814,12 @@
         <div class="hero-card">
           <div class="hero-card-tag">LIVE SESSION SNAPSHOT</div>
           <div class="hero-card-main">
+            <!-- 여기: 이미지 추가 -->
+            <img
+              class="hero-card-img"
+              src="images/haneul-e-issneun-hwansangjeog-in-golae%20(1).jpg"
+              alt="Night Drive Showcase visual"
+            />
             <div class="hero-card-title">Night Drive Showcase</div>
             <div class="hero-card-sub">
               도심 네온 불빛 아래, 로컬 아티스트들과 함께 만든
@@ -1087,8 +1105,8 @@
     function render() {
       ctx.clearRect(0, 0, cw, ch);
       ctx2.clearRect(0, 0, cw, ch);
-      arr.forEach((c) => drawDot(c));
-      arr2.forEach((c) => drawSnow(c));
+      arr.forEach((cPart) => drawDot(cPart));
+      arr2.forEach((cPart) => drawSnow(cPart));
     }
 
     function drawDot(cPart) {
@@ -1101,7 +1119,7 @@
       ctx.beginPath();
       ctx.arc(x, y, (cPart.dot * cPart.s) / 2 / ms, 0, T);
       ctx.fill();
-      ctx.lineWidth = cPart.dot * cPart.s * 2 / ms;
+      ctx.lineWidth = (cPart.dot * cPart.s * 2) / ms;
       ctx.stroke();
     }
 
